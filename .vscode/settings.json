@@ -1,0 +1,11 @@
+{
+    "kiroAgent.configureMCP": "Disabled",
+    "terminal.integrated.allowChords": false,
+    "kiroAgent.trustedCommands": [
+        "grep -n \"LeaveRequest\\|TodayLeave\" lib/screens/dashboard_screen.dart | head -20",
+        "flutter run ",
+        "flutter pub get ",
+        "ls -lh *.md 2>/dev/null | awk '{print $9, \"(\" $5 \")\"}'",
+        "flutter *"
+    ]
+}

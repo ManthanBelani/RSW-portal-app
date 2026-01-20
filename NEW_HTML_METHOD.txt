@@ -1,0 +1,441 @@
+return '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice #$invoiceNo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #282727;
+      background: #fff;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .invoice-container {
+      width: 210mm;
+      min-height: 297mm;
+      background: white;
+      position: relative;
+      padding: 50px 75px 0;
+    }
+    
+    /* Pink curved background image */
+    .bg-image {
+      position: absolute;
+      top: -344px;
+      right: -205px;
+      width: 900px;
+      height: 900px;
+      transform: rotate(330deg);
+      z-index: 0;
+      opacity: 1;
+    }
+    
+    .content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0;
+    }
+    
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 80px;
+    }
+    
+    .logo-icon { width: 60px; height: auto; }
+    .logo-wordmark { width: 360px; height: auto; }
+    
+    .issuer-section, .customer-section {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    
+    .section-label {
+      color: #FC3342;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .section-value {
+      font-weight: 500;
+      color: #000;
+    }
+    
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    
+    .contact-icon {
+      width: 14px;
+      height: 14px;
+      color: #FC3342;
+    }
+    
+    /* Invoice badge & details */
+    .invoice-badge-container {
+      position: relative;
+    }
+    
+    .invoice-badge {
+      background: linear-gradient(135deg, #f77a83, #FC3342);
+      color: white;
+      font-size: 50px;
+      font-weight: 700;
+      text-align: center;
+      padding: 20px 40px;
+      border-radius: 50px 0 0 50px;
+      position: relative;
+      top: 40px;
+      right: -100px;
+      width: fit-content;
+      margin-left: auto;
+    }
+    
+    .invoice-details {
+      position: absolute;
+      top: 60px;
+      right: 68px;
+      text-align: right;
+      font-size: 16px;
+      font-weight: 500;
+      width: 400px;
+    }
+    
+    .detail-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+    
+    .detail-label { font-weight: 500; }
+    .detail-value { font-weight: 500; color: #000; }
+    
+    /* Table */
+    .invoice-table {
+      width: 95%;
+      margin: 90px auto 0;
+      border-collapse: collapse;
+    }
+    
+    .table-header {
+      background: linear-gradient(135deg, #f77a83, #FC3342);
+      border-radius: 25px;
+    }
+    
+    .table-header td {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 15px 40px;
+    }
+    
+    .table-header .desc { text-align: left; width: 80%; }
+    .table-header .amt { text-align: right; width: 20%; }
+    
+    .table-row td {
+      padding: 15px 40px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #000;
+      vertical-align: top;
+    }
+    
+    .table-row .desc { text-align: left; width: 80%; line-height: 1.5; }
+    .table-row .amt { text-align: right; width: 20%; }
+    
+    .divider {
+      margin: 16px 40px;
+      border: 0;
+      border-top: 1px solid #eee;
+    }
+    
+    /* Totals & Bank */
+    .totals-bank {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    
+    .bank-section {
+      width: 55%;
+      padding-left: 0;
+    }
+    
+    .totals-section {
+      width: 30%;
+      text-align: right;
+      padding-right: 65px;
+    }
+    
+    .amount-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+    
+    .amount-label { font-weight: 500; color: #07293b; }
+    .amount-value { font-weight: 500; color: #000; }
+    
+    /* Notice */
+    .notice-section {
+      margin: 10px 0 12px;
+      padding-left: 75px;
+      font-size: 16px;
+      display: flex;
+      line-height: 1.6;
+    }
+    
+    .notice-label {
+      width: 75px;
+      color: #FC3342;
+      font-weight: 700;
+    }
+    
+    .notice-text {
+      font-weight: 500;
+      color: #000;
+      flex: 1;
+    }
+    
+    /* Bank Table */
+    .bank-table {
+      font-size: 16px;
+      width: 100%;
+    }
+    
+    .bank-table td {
+      padding: 4px 0;
+      vertical-align: baseline;
+    }
+    
+    .bank-label {
+      width: 165px;
+      font-weight: 500;
+      color: #07293b;
+    }
+    
+    .bank-value {
+      font-weight: 500;
+      color: #000;
+    }
+    
+    /* Thank You */
+    .thank-you {
+      text-align: center;
+      margin-top: ${notice.isEmpty ? '200px' : '150px'};
+      margin-bottom: 80px;
+    }
+    
+    .thank-you-pill {
+      display: inline-flex;
+      width: 95%;
+      border: 1px solid #ddd;
+      border-radius: 50px;
+    }
+    
+    .thank-you-btn {
+      flex: 1;
+      background: linear-gradient(135deg, #f77a83, #FC3342);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 15px;
+      border-radius: 50px;
+      text-align: center;
+    }
+    
+    /* Footer */
+    .footer {
+      background: linear-gradient(135deg, #f77a83, #FC3342);
+      height: 140px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .footer-inner {
+      background: white;
+      height: 50px;
+      width: 90%;
+      border-radius: 30px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    
+    .footer-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #000;
+    }
+    
+    .footer-icon {
+      font-size: 24px;
+      color: #FC3342;
+    }
+  </style>
+</head>
+<body>
+  <div class="invoice-container">
+    <img src="data:image/png;base64,$bgImageBase64" class="bg-image" alt="">
+    
+    <div class="content">
+      <!-- Header -->
+      <div class="header">
+        <div>
+          <div class="logo-section">
+            <img src="data:image/png;base64,$iconBase64" class="logo-icon" alt="Icon">
+            <img src="data:image/png;base64,$logoBase64" class="logo-wordmark" alt="Rainstream">
+          </div>
+          
+          <div class="issuer-section">
+            <div class="section-label">ISSUER:</div>
+            <div class="section-value">
+              Rainstream Technologies<br>
+              1111, Anam 2, Ambli Bopal,<br>
+              Junction, Nr. Bopal Flyover,<br>
+              Ambli, Ahmedabad, Gujarat 380058<br>
+              <div class="contact-item">
+                <span class="contact-icon">✉</span> : rainstreamweb@gmail.com
+              </div>
+              <div class="contact-item">
+                <span class="contact-icon">📞</span> : +91 9512566601
+              </div>
+              GSTIN : 24AOLPJ1440C1ZI
+            </div>
+          </div>
+          
+          <div class="customer-section" style="margin-top: 13px;">
+            <div class="section-label">CUSTOMER:</div>
+            <div class="section-value">
+              $clientName<br>
+              $clientAddressHtml
+            </div>
+          </div>
+        </div>
+        
+        <div class="invoice-badge-container">
+          <div class="invoice-badge">INVOICE</div>
+          <div class="invoice-details">
+            <div class="detail-row">
+              <span class="detail-label">Invoice No :</span>
+              <span class="detail-value">$invoiceNo</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Invoice Date :</span>
+              <span class="detail-value">$invoiceDate</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Due Date :</span>
+              <span class="detail-value">$dueDate</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Table -->
+      <table class="invoice-table">
+        <thead>
+          <tr class="table-header">
+            <td class="desc">DESCRIPTION</td>
+            <td class="amt">AMOUNT</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="table-row">
+            <td class="desc">$jobDescHtml</td>
+            <td class="amt">$currencySymbol $invoiceAmount $currencyCode</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <hr class="divider">
+      
+      <!-- Totals & Bank -->
+      <div class="totals-bank">
+        <div class="bank-section">
+          ${(bankRows.isNotEmpty) ? '''
+          <div class="section-label">BANK DETAILS:</div>
+          <table class="bank-table">
+            ${bankRows.join('')}
+          </table>
+          ''' : ''}
+        </div>
+        
+        <div class="totals-section">
+          <div class="amount-row">
+            <span class="amount-label">Total Amount :</span>
+            <span class="amount-value">$currencySymbol $invoiceAmount $currencyCode</span>
+          </div>
+          ${discountAmount > 0 ? '''
+          <div class="amount-row">
+            <span class="amount-label">$discountLabel :</span>
+            <span class="amount-value">$currencySymbol $discountAmount $currencyCode</span>
+          </div>
+          <div class="amount-row">
+            <span class="amount-label">Final Due :</span>
+            <span class="amount-value">$currencySymbol $finalDue $currencyCode</span>
+          </div>
+          ''' : ''}
+        </div>
+      </div>
+      
+      <!-- Notice -->
+      ${notice.isNotEmpty ? '''
+      <div class="notice-section">
+        <div class="notice-label">NOTICE:</div>
+        <div class="notice-text">$notice</div>
+      </div>
+      ''' : ''}
+      
+      <!-- Thank You -->
+      <div class="thank-you">
+        <div class="thank-you-pill">
+          <div style="flex:2"></div>
+          <div class="thank-you-btn">Thank You</div>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="footer">
+        <div class="footer-inner">
+          <div class="footer-item">
+            <span class="footer-icon">🌐</span>
+            <span>https://rainstreamweb.com</span>
+          </div>
+          <div class="footer-item">
+            <span class="footer-icon">📞</span>
+            <span>+91 951 256 6601</span>
+          </div>
+          <div class="footer-item">
+            <span class="footer-icon">✉</span>
+            <span>info@rainstreamweb.com</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+''';
